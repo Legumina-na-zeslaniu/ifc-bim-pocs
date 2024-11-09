@@ -3,12 +3,27 @@ import * as path from 'node:path';
 import * as crypto from 'node:crypto';
 import * as WebIFC from 'web-ifc';
 
+// 126e3a92-870a-4209-b222-3c1777451a23
+// #100015=IFCCOLOURRGB($,0.5,0.5,0.5);
+// #100016=IFCSURFACESTYLERENDERING(#100015,0.,0.,$,$,$,$,$,.NOTDEFINED.);
+// #100017=IFCSURFACESTYLE('my surfacestyle',.BOTH.,(#100016));
+// #100018=IFCSTYLEDITEM(#100011,(#100017),$);
+// #100019=IFCSITE('site id',$,'my site','',$,$,$,$,$,$,$,$,$,$);
+// #100020=IFCRELAGGREGATES('aggregation id',$,$,$,#10009,(#100019));
+// #100021=IFCBUILDING('building id',$,'building','',$,$,$,$,$,$,$,$);
+// #100022=IFCRELAGGREGATES('aggregation id.2',$,$,$,#100019,(#100021));
+// #100023=IFCBUILDINGSTOREY('story id.2',$,'level 0','story',$,$,$,$,$,0.);
+// #100024=IFCRELAGGREGATES('aggregation id.3',$,$,$,#100021,(#100023));
+// #100025=IFCRELCONTAINEDINSPATIALSTRUCTURE('spatial id',$,$,$,(#100014),#100023);
+
 const bootstrap = async () => {
+    let expressId = 0;
+
     const api = new WebIFC.IfcAPI();
     await api.Init();
 
     const modelId = api.CreateModel({
-        schema: WebIFC.Schemas.IFC4,
+        schema: WebIFC.Schemas.IFC2X3,
         name: 'model name',
         description: ['model desc'],
         authors: ['deeply depressed hackers'],
@@ -17,8 +32,8 @@ const bootstrap = async () => {
 
     const organization = new WebIFC.IFC4.IfcOrganization(
         new WebIFC.IFC4.IfcIdentifier('organization id'),
-        null,
         new WebIFC.IFC4.IfcLabel('organization name'),
+        null,
         null,
         null,
     );
@@ -40,7 +55,9 @@ const bootstrap = async () => {
         WebIFC.IFC4.IfcSIUnitName.CUBIC_METRE,
     );
 
-    const assignment = new WebIFC.IFC4.IfcUnitAssignment([unit]);
+    const assignment = new WebIFC.IFC4.IfcUnitAssignment(
+        [unit]
+    );
 
     api.WriteLine(modelId, assignment);
 
@@ -50,14 +67,22 @@ const bootstrap = async () => {
         new WebIFC.IFC4.IfcLengthMeasure(0),
     ]
 
-    const point = new WebIFC.IFC4.IfcCartesianPoint(origin);
+    const point = new WebIFC.IFC4.IfcCartesianPoint(
+        origin
+    );
 
     api.WriteLine(modelId, point);
 
     origin[2].value = 1;
-    const direction = new WebIFC.IFC4.IfcDirection(origin);
+    const direction = new WebIFC.IFC4.IfcDirection(
+        origin
+    );
 
-    const axis = new WebIFC.IFC4.IfcAxis2Placement3D(point, direction, null);
+    const axis = new WebIFC.IFC4.IfcAxis2Placement3D(
+        point,
+        direction,
+        null
+    );
     api.WriteLine(modelId, axis);
 
     const geometry = new WebIFC.IFC4.IfcGeometricRepresentationContext(
@@ -107,7 +132,11 @@ const bootstrap = async () => {
         [solid]
     );
 
-    const product = new WebIFC.IFC4.IfcProductDefinitionShape(null, null, [shape]);
+    const product = new WebIFC.IFC4.IfcProductDefinitionShape(
+        null,
+        null,
+        [shape]
+    );
 
     const column = new WebIFC.IFC4.IfcColumn(
         new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()),
@@ -164,7 +193,7 @@ const bootstrap = async () => {
         new WebIFC.IFC4.IfcGloballyUniqueId('site id'),
         null,
         new WebIFC.IFC4.IfcLabel('my site'),
-        new WebIFC.IFC4.IfcText(''),
+        new WebIFC.IFC4.IfcText('my site'),
         null,
         null,
         null,
@@ -250,7 +279,6 @@ const bootstrap = async () => {
     api.WriteLine(modelId, spatial);
 
     fs.writeFileSync(path.join(process.cwd(), 'etc', `model-${Date.now()}.ifc`), api.SaveModel(modelId));
-
     api.CloseModel(modelId);
 }
 

@@ -1,6 +1,7 @@
 {
   "name": "4_node_read_and_write",
   "packageManager": "yarn@4.5.1",
+  "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js"

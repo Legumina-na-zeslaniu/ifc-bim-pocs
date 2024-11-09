@@ -1,0 +1,39 @@
+ISO-10303-21;
+HEADER;
+/******************************************************
+* STEP Physical File produced by: That Open Engine WebIfc 0.0.61
+* Module: web-ifc/IfcLoader
+* Version: 0.0.61
+* Source: https://github.com/ThatOpen/engine_web-ifc
+* Issues: https://github.com/ThatOpen/engine_web-ifc/issues
+******************************************************/
+FILE_DESCRIPTION(('model desc'),'2;1');
+FILE_NAME('model name','2024-11-09T15:09:17',('deeply depressed hackers'),(),'thatopen/web-ifc-api','thatopen/web-ifc-api',$);
+FILE_SCHEMA(('IFC4'));
+ENDSEC;
+DATA;
+#1=IFCORGANIZATION('organization id','organization name',$,$,$);
+#2=IFCAPPLICATION(#1,'application version','application name','app');
+#3=IFCSIUNIT(#0,.VOLUMEUNIT.,.MILLI.,.CUBIC_METRE.);
+#4=IFCUNITASSIGNMENT((#3));
+#5=IFCCARTESIANPOINT((0.,0.,1.));
+#6=IFCDIRECTION((0.,0.,1.));
+#7=IFCAXIS2PLACEMENT3D(#5,#6,$);
+#8=IFCGEOMETRICREPRESENTATIONCONTEXT('model','model',3,$,#7,#6);
+#9=IFCPROJECT('628b87c1-13ba-400e-b13a-8d0ccbc5c294',$,'project','project description',$,$,$,(#8),#4);
+#10=IFCRECTANGLEPROFILEDEF(.AREA.,'profile',$,300.,400.);
+#11=IFCEXTRUDEDAREASOLID(#10,#7,#6,4000.);
+#12=IFCSHAPEREPRESENTATION(#8,'solid','solid description',(#11));
+#13=IFCPRODUCTDEFINITIONSHAPE($,$,(#12));
+#14=IFCCOLUMN('a872b5b2-4fb4-40ff-88e3-9211fc67403b',$,'column','column description',$,$,#13,'column identifier',.NOTDEFINED.);
+#15=IFCCOLOURRGB($,0.5,0.5,0.5);
+#16=IFCSURFACESTYLERENDERING(#15,0.,0.,$,$,$,$,$,.NOTDEFINED.);
+#17=IFCSURFACESTYLE('my surfacestyle',.BOTH.,(#16));
+#18=IFCSTYLEDITEM(#11,(#17),$);
+#19=IFCSITE('site id',$,'my site','',$,$,$,$,$,$,$,$,$,$);
+#20=IFCRELAGGREGATES('aggregation id',$,$,$,#9,(#19));
+#21=IFCBUILDING('building id',$,'building','',$,$,$,$,$,$,$,$);
+#22=IFCBUILDINGSTOREY('story id.2',$,'level 0','story',$,$,$,$,$,0.);
+#23=IFCRELCONTAINEDINSPATIALSTRUCTURE('spatial id',$,$,$,(#14),#22);
+ENDSEC;
+END-ISO-10303-21;
