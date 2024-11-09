@@ -1,0 +1,24 @@
+ISO-10303-21;
+HEADER;
+/******************************************************
+* STEP Physical File produced by: That Open Engine WebIfc 0.0.61
+* Module: web-ifc/IfcLoader
+* Version: 0.0.61
+* Source: https://github.com/ThatOpen/engine_web-ifc
+* Issues: https://github.com/ThatOpen/engine_web-ifc/issues
+******************************************************/
+FILE_DESCRIPTION(('ViewDefinition [CoordinationView]'),'2;1');
+FILE_NAME('web-ifc-model-0.ifc','2024-11-09T12:46:26',($),($),'thatopen/web-ifc-api','thatopen/web-ifc-api',$);
+FILE_SCHEMA(('IFC4'));
+ENDSEC;
+DATA;
+#1=IFCCARTESIANPOINT((0.,0.,0.));
+#2=IFCAXIS2PLACEMENT3D(#1,$,$);
+#3=IFCCARTESIANPOINT((0.,0.));
+#4=IFCAXIS2PLACEMENT2D(#3,$);
+#5=IFCCIRCLEPROFILEDEF(.AREA.,'column-prefab',#4,0.25);
+#6=IFCDIRECTION((0.,0.,1.));
+#7=IFCEXTRUDEDAREASOLID(#5,#2,#6,2000.);
+#8=IFCCOLUMN('GUID',$,'name',$,'label',#2,#7,'sadf',$);
+ENDSEC;
+END-ISO-10303-21;

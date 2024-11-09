@@ -236,10 +236,10 @@ window.onload = async () => {
 
     await loadIfc()
 
-    const model = await loader.loadAsync('/model.glb');
-    model.scene.children[0].position.set(-0.5, 3, 0);
-    model.scene.children[0].rotation.set(0, Math.PI / 2, 0);
-    world.scene.three.add(model.scene.children[0]);
+    // const model = await loader.loadAsync('/model.glb');
+    // model.scene.children[0].position.set(-0.5, 3, 0);
+    // model.scene.children[0].rotation.set(0, Math.PI / 2, 0);
+    // world.scene.three.add(model.scene.children[0]);
 
     // const geometry = new THREE.BoxGeometry();
     // const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
