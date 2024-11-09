@@ -1,0 +1,45 @@
+ISO-10303-21;
+HEADER;
+/******************************************************
+* STEP Physical File produced by: That Open Engine WebIfc 0.0.61
+* Module: web-ifc/IfcLoader
+* Version: 0.0.61
+* Source: https://github.com/ThatOpen/engine_web-ifc
+* Issues: https://github.com/ThatOpen/engine_web-ifc/issues
+******************************************************/
+FILE_DESCRIPTION(('model desc'),'2;1');
+FILE_NAME('model name','2024-11-09T20:23:29',('deeply depressed hackers'),(),'thatopen/web-ifc-api','thatopen/web-ifc-api',$);
+FILE_SCHEMA(('IFC2X3'));
+ENDSEC;
+DATA;
+#1=IFCORGANIZATION($,'organization name',$,$,$);
+#2=IFCAPPLICATION(#1,'application version','application name','app');
+#3=IFCSIUNIT(#0,.VOLUMEUNIT.,.MILLI.,.CUBIC_METRE.);
+#4=IFCUNITASSIGNMENT((#3));
+#5=IFCCARTESIANPOINT((0.,0.,1.));
+#6=IFCDIRECTION((0.,0.,1.));
+#7=IFCAXIS2PLACEMENT3D(#5,#6,$);
+#8=IFCGEOMETRICREPRESENTATIONCONTEXT('model','model',3,$,#7,#6);
+#9=IFCPERSON($,$,$,$,$,$,$,$);
+#10=IFCORGANIZATION($,'organization',$,$,$);
+#11=IFCPERSONANDORGANIZATION(#9,#10,$);
+#12=IFCOWNERHISTORY(#11,#2,$,$,$,$,$,$);
+#13=IFCPROJECT('da580aa1-0168-4813-8f81-d3d32e2fe835',#12,'project','project description',$,$,$,(#8),#4);
+#14=IFCRECTANGLEPROFILEDEF(.AREA.,'profile',$,300.,400.);
+#15=IFCEXTRUDEDAREASOLID(#14,#7,#6,4000.);
+#16=IFCSHAPEREPRESENTATION(#8,'solid','solid description',(#15));
+#17=IFCPRODUCTDEFINITIONSHAPE($,$,(#16));
+#18=IFCCOLUMN('dad05ec6-1528-4db9-a5bf-59601a20bb1c',$,'column','column description',$,$,#17,'column identifier');
+#19=IFCCOLOURRGB($,0.5,0.5,0.5);
+#20=IFCSURFACESTYLERENDERING(#19,0.,0.,$,$,$,$,$,.NOTDEFINED.);
+#21=IFCSURFACESTYLE('my surfacestyle',.BOTH.,(#20));
+#22=IFCSTYLEDITEM(#15,(#21),$);
+#23=IFCSITE('site id',$,'my site','my site',$,$,$,$,$,$,$,$,$,$);
+#24=IFCRELAGGREGATES('aggregation id',$,$,$,#13,(#23));
+#25=IFCBUILDING('building id',#12,'building','',$,$,$,$,$,$,$,$);
+#26=IFCRELAGGREGATES('aggregation id.2',$,$,$,#23,(#25));
+#27=IFCBUILDINGSTOREY('story id.2',#12,'level 0','story',$,$,$,$,$,0.);
+#28=IFCRELAGGREGATES('aggregation id.3',$,$,$,#25,(#27));
+#29=IFCRELCONTAINEDINSPATIALSTRUCTURE('spatial id',$,$,$,(#18),#27);
+ENDSEC;
+END-ISO-10303-21;

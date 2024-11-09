@@ -1,0 +1,41 @@
+ISO-10303-21;
+HEADER;
+/******************************************************
+* STEP Physical File produced by: That Open Engine WebIfc 0.0.61
+* Module: web-ifc/IfcLoader
+* Version: 0.0.61
+* Source: https://github.com/ThatOpen/engine_web-ifc
+* Issues: https://github.com/ThatOpen/engine_web-ifc/issues
+******************************************************/
+FILE_DESCRIPTION(('model desc'),'2;1');
+FILE_NAME('model name','2024-11-09T20:21:18',('deeply depressed hackers'),(),'thatopen/web-ifc-api','thatopen/web-ifc-api',$);
+FILE_SCHEMA(('IFC2X3'));
+ENDSEC;
+DATA;
+#1=IFCORGANIZATION($,'organization name',$,$,$);
+#2=IFCAPPLICATION(#1,'application version','application name','app');
+#3=IFCSIUNIT(#0,.VOLUMEUNIT.,.MILLI.,.CUBIC_METRE.);
+#4=IFCUNITASSIGNMENT((#3));
+#5=IFCCARTESIANPOINT((0.,0.,1.));
+#6=IFCDIRECTION((0.,0.,1.));
+#7=IFCAXIS2PLACEMENT3D(#5,#6,$);
+#8=IFCGEOMETRICREPRESENTATIONCONTEXT('model','model',3,$,#7,#6);
+#9=IFCPROJECT('a0bafeca-0cc8-4919-b8df-65c57b93e106',#4294967295,'project','project description',$,$,$,(#8),#4);
+#10=IFCRECTANGLEPROFILEDEF(.AREA.,'profile',$,300.,400.);
+#11=IFCEXTRUDEDAREASOLID(#10,#7,#6,4000.);
+#12=IFCSHAPEREPRESENTATION(#8,'solid','solid description',(#11));
+#13=IFCPRODUCTDEFINITIONSHAPE($,$,(#12));
+#14=IFCCOLUMN('2fa0aa7f-410a-4620-9109-928ab0d3df13',$,'column','column description',$,$,#13,'column identifier');
+#15=IFCCOLOURRGB($,0.5,0.5,0.5);
+#16=IFCSURFACESTYLERENDERING(#15,0.,0.,$,$,$,$,$,.NOTDEFINED.);
+#17=IFCSURFACESTYLE('my surfacestyle',.BOTH.,(#16));
+#18=IFCSTYLEDITEM(#11,(#17),$);
+#19=IFCSITE('site id',$,'my site','my site',$,$,$,$,$,$,$,$,$,$);
+#20=IFCRELAGGREGATES('aggregation id',$,$,$,#9,(#19));
+#21=IFCBUILDING('building id',#4294967295,'building','',$,$,$,$,$,$,$,$);
+#22=IFCRELAGGREGATES('aggregation id.2',$,$,$,#19,(#21));
+#23=IFCBUILDINGSTOREY('story id.2',#4294967295,'level 0','story',$,$,$,$,$,0.);
+#24=IFCRELAGGREGATES('aggregation id.3',$,$,$,#21,(#23));
+#25=IFCRELCONTAINEDINSPATIALSTRUCTURE('spatial id',$,$,$,(#14),#23);
+ENDSEC;
+END-ISO-10303-21;

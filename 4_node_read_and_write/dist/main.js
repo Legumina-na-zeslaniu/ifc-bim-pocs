@@ -14,17 +14,6 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const WebIFC = require("web-ifc");
 // 126e3a92-870a-4209-b222-3c1777451a23
-// #100015=IFCCOLOURRGB($,0.5,0.5,0.5);
-// #100016=IFCSURFACESTYLERENDERING(#100015,0.,0.,$,$,$,$,$,.NOTDEFINED.);
-// #100017=IFCSURFACESTYLE('my surfacestyle',.BOTH.,(#100016));
-// #100018=IFCSTYLEDITEM(#100011,(#100017),$);
-// #100019=IFCSITE('site id',$,'my site','',$,$,$,$,$,$,$,$,$,$);
-// #100020=IFCRELAGGREGATES('aggregation id',$,$,$,#10009,(#100019));
-// #100021=IFCBUILDING('building id',$,'building','',$,$,$,$,$,$,$,$);
-// #100022=IFCRELAGGREGATES('aggregation id.2',$,$,$,#100019,(#100021));
-// #100023=IFCBUILDINGSTOREY('story id.2',$,'level 0','story',$,$,$,$,$,0.);
-// #100024=IFCRELAGGREGATES('aggregation id.3',$,$,$,#100021,(#100023));
-// #100025=IFCRELCONTAINEDINSPATIALSTRUCTURE('spatial id',$,$,$,(#100014),#100023);
 const bootstrap = () => __awaiter(void 0, void 0, void 0, function* () {
     let expressId = 0;
     const api = new WebIFC.IfcAPI();
@@ -40,7 +29,7 @@ const bootstrap = () => __awaiter(void 0, void 0, void 0, function* () {
     api.WriteLine(modelId, organization);
     const application = new WebIFC.IFC4.IfcApplication(organization, new WebIFC.IFC4.IfcLabel('application version'), new WebIFC.IFC4.IfcLabel('application name'), new WebIFC.IFC4.IfcLabel('app'));
     api.WriteLine(modelId, application);
-    const unit = new WebIFC.IFC4.IfcSIUnit(WebIFC.IFC4.IfcUnitEnum.VOLUMEUNIT, WebIFC.IFC4.IfcSIPrefix.MILLI, WebIFC.IFC4.IfcSIUnitName.CUBIC_METRE);
+    const unit = new WebIFC.IFC4.IfcSIUnit(WebIFC.IFC4.IfcUnitEnum.VOLUMEUNIT, null, WebIFC.IFC4.IfcSIUnitName.CUBIC_METRE);
     const assignment = new WebIFC.IFC4.IfcUnitAssignment([unit]);
     api.WriteLine(modelId, assignment);
     const origin = [
@@ -56,33 +45,54 @@ const bootstrap = () => __awaiter(void 0, void 0, void 0, function* () {
     api.WriteLine(modelId, axis);
     const geometry = new WebIFC.IFC4.IfcGeometricRepresentationContext(new WebIFC.IFC4.IfcLabel('model'), new WebIFC.IFC4.IfcLabel('model'), new WebIFC.IFC4.IfcDimensionCount(3), null, axis, direction);
     api.WriteLine(modelId, geometry);
-    const project = new WebIFC.IFC4.IfcProject(new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()), null, new WebIFC.IFC4.IfcLabel('project'), new WebIFC.IFC4.IfcText('project description'), null, null, null, [geometry], assignment);
+    const history = new WebIFC.IFC4.IfcOwnerHistory(new WebIFC.IFC4.IfcPersonAndOrganization(new WebIFC.IFC4.IfcPerson(null, null, null, null, null, null, null, null), new WebIFC.IFC4.IfcOrganization(null, new WebIFC.IFC4.IfcLabel('organization'), null, null, null), null), new WebIFC.Handle(application.expressID), null, WebIFC.IFC4.IfcChangeActionEnum.ADDED, null, null, null, new WebIFC.IFC4.IfcTimeStamp('2024-11-09T21:34:00Z'));
+    api.WriteLine(modelId, history);
+    const project = new WebIFC.IFC4.IfcProject(new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()), new WebIFC.Handle(history.expressID), new WebIFC.IFC4.IfcLabel('project'), new WebIFC.IFC4.IfcText('project description'), null, null, null, [geometry], assignment);
     api.WriteLine(modelId, project);
-    const profile = new WebIFC.IFC4.IfcRectangleProfileDef(WebIFC.IFC4.IfcProfileTypeEnum.AREA, new WebIFC.IFC4.IfcLabel('profile'), null, new WebIFC.IFC4.IfcPositiveLengthMeasure(300), new WebIFC.IFC4.IfcPositiveLengthMeasure(400));
+    // #11=IFCDIRECTION((1.,0.));
+    // #2412=IFCCARTESIANPOINT((-1.7763568394002505E-14,0.));
+    // #2413=IFCAXIS2PLACEMENT2D(#2412,#11);
+    // #2414=IFCRECTANGLEPROFILEDEF(.AREA.,'1740X2032X2',#2413,50.799999999995052,735.00000000000045);
+    const position = new WebIFC.IFC4.IfcAxis2Placement2D(new WebIFC.IFC4.IfcCartesianPoint([
+        new WebIFC.IFC4.IfcLengthMeasure(0),
+        new WebIFC.IFC4.IfcLengthMeasure(0),
+    ]), new WebIFC.IFC4.IfcDirection([
+        new WebIFC.IFC4.IfcReal(1),
+        new WebIFC.IFC4.IfcReal(0),
+    ]));
+    api.WriteLine(modelId, position);
+    const profile = new WebIFC.IFC4.IfcRectangleProfileDef(WebIFC.IFC4.IfcProfileTypeEnum.AREA, new WebIFC.IFC4.IfcLabel('profile'), new WebIFC.Handle(position.expressID), new WebIFC.IFC4.IfcPositiveLengthMeasure(300), new WebIFC.IFC4.IfcPositiveLengthMeasure(400));
     const solid = new WebIFC.IFC4.IfcExtrudedAreaSolid(profile, axis, direction, new WebIFC.IFC4.IfcPositiveLengthMeasure(4000));
     const shape = new WebIFC.IFC4.IfcShapeRepresentation(geometry, new WebIFC.IFC4.IfcLabel('solid'), new WebIFC.IFC4.IfcLabel('solid description'), [solid]);
     const product = new WebIFC.IFC4.IfcProductDefinitionShape(null, null, [shape]);
-    const column = new WebIFC.IFC4.IfcColumn(new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()), null, new WebIFC.IFC4.IfcLabel('column'), new WebIFC.IFC4.IfcText('column description'), null, null, product, new WebIFC.IFC4.IfcIdentifier('column identifier'), WebIFC.IFC4.IfcColumnTypeEnum.NOTDEFINED);
+    const column = new WebIFC.IFC4.IfcColumn(new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()), new WebIFC.Handle(history.expressID), new WebIFC.IFC4.IfcLabel('column'), new WebIFC.IFC4.IfcText('column description'), null, null, product, new WebIFC.IFC4.IfcIdentifier('column identifier'), WebIFC.IFC4.IfcColumnTypeEnum.NOTDEFINED);
     api.WriteLine(modelId, column);
     const color = new WebIFC.IFC4.IfcColourRgb(null, new WebIFC.IFC4.IfcNormalisedRatioMeasure(0.5), new WebIFC.IFC4.IfcNormalisedRatioMeasure(0.5), new WebIFC.IFC4.IfcNormalisedRatioMeasure(0.5));
     api.WriteLine(modelId, color);
     const rendering = new WebIFC.IFC4.IfcSurfaceStyleRendering(color, new WebIFC.IFC4.IfcNormalisedRatioMeasure(0), new WebIFC.IFC4.IfcNormalisedRatioMeasure(0), null, null, null, null, null, WebIFC.IFC4.IfcReflectanceMethodEnum.NOTDEFINED);
+    // IfcLabel
+    // IfcSurfaceSide
+    // IfcSurfaceStyleElementSelect
     const style = new WebIFC.IFC4.IfcSurfaceStyle(new WebIFC.IFC4.IfcLabel('my surfacestyle'), WebIFC.IFC4.IfcSurfaceSide.BOTH, [rendering]);
     api.WriteLine(modelId, style);
+    // IfcRepresentationItem
+    // IfcStyleAssignmentSelect[]
+    // IfcLabel
+    // ENTITY IfcRepresentationItem ABSTRACT SUPERTYPE OF	(ONEOF(IfcTopologicalRepresentationItem, IfcGeometricRepresentationItem, IfcMappedItem, IfcStyledItem));
     const item = new WebIFC.IFC4.IfcStyledItem(solid, [style], null);
     api.WriteLine(modelId, item);
-    const site = new WebIFC.IFC4.IfcSite(new WebIFC.IFC4.IfcGloballyUniqueId('site id'), null, new WebIFC.IFC4.IfcLabel('my site'), new WebIFC.IFC4.IfcText('my site'), null, null, null, null, null, null, null, null, null, null);
+    const site = new WebIFC.IFC4.IfcSite(new WebIFC.IFC4.IfcGloballyUniqueId('site id'), new WebIFC.Handle(history.expressID), new WebIFC.IFC4.IfcLabel('my site'), new WebIFC.IFC4.IfcText('my site'), null, null, null, null, WebIFC.IFC4.IfcElementCompositionEnum.COMPLEX, null, null, null, null, null);
     api.WriteLine(modelId, site);
-    const aggregation = new WebIFC.IFC4.IfcRelAggregates(new WebIFC.IFC4.IfcGloballyUniqueId('aggregation id'), null, null, null, project, [site]);
+    const aggregation = new WebIFC.IFC4.IfcRelAggregates(new WebIFC.IFC4.IfcGloballyUniqueId('aggregation id'), new WebIFC.Handle(history.expressID), null, null, project, [site]);
     api.WriteLine(modelId, aggregation);
-    const building = new WebIFC.IFC4.IfcBuilding(new WebIFC.IFC4.IfcGloballyUniqueId('building id'), null, new WebIFC.IFC4.IfcLabel('building'), new WebIFC.IFC4.IfcText(''), null, null, null, null, null, null, null, null);
+    const building = new WebIFC.IFC4.IfcBuilding(new WebIFC.IFC4.IfcGloballyUniqueId('building id'), new WebIFC.Handle(history.expressID), new WebIFC.IFC4.IfcLabel('building'), new WebIFC.IFC4.IfcText(''), null, null, null, null, WebIFC.IFC4.IfcElementCompositionEnum.COMPLEX, null, null, null);
     api.WriteLine(modelId, building);
     aggregation.expressID = api.GetMaxExpressID(modelId) + 1;
     aggregation.GlobalId = new WebIFC.IFC4.IfcGloballyUniqueId('aggregation id.2');
     aggregation.RelatedObjects = [building];
     aggregation.RelatingObject = site;
     api.WriteLine(modelId, aggregation);
-    const storey = new WebIFC.IFC4.IfcBuildingStorey(new WebIFC.IFC4.IfcGloballyUniqueId('story id.2'), null, new WebIFC.IFC4.IfcLabel('level 0'), new WebIFC.IFC4.IfcText('story'), null, null, null, null, null, new WebIFC.IFC4.IfcPositiveLengthMeasure(0));
+    const storey = new WebIFC.IFC4.IfcBuildingStorey(new WebIFC.IFC4.IfcGloballyUniqueId('story id.2'), new WebIFC.Handle(history.expressID), new WebIFC.IFC4.IfcLabel('level 0'), new WebIFC.IFC4.IfcText('story'), null, null, null, null, WebIFC.IFC4.IfcElementCompositionEnum.COMPLEX, new WebIFC.IFC4.IfcPositiveLengthMeasure(0));
     api.WriteLine(modelId, storey);
     aggregation.expressID = api.GetMaxExpressID(modelId) + 1;
     aggregation.GlobalId = new WebIFC.IFC4.IfcGloballyUniqueId('aggregation id.3');
@@ -90,7 +100,7 @@ const bootstrap = () => __awaiter(void 0, void 0, void 0, function* () {
     aggregation.RelatingObject = building;
     api.WriteLine(modelId, aggregation);
     const elements = [column];
-    const spatial = new WebIFC.IFC4.IfcRelContainedInSpatialStructure(new WebIFC.IFC4.IfcGloballyUniqueId('spatial id'), null, null, null, elements, storey);
+    const spatial = new WebIFC.IFC4.IfcRelContainedInSpatialStructure(new WebIFC.IFC4.IfcGloballyUniqueId('spatial id'), new WebIFC.Handle(history.expressID), null, null, elements, storey);
     api.WriteLine(modelId, spatial);
     fs.writeFileSync(path.join(process.cwd(), 'etc', `model-${Date.now()}.ifc`), api.SaveModel(modelId));
     api.CloseModel(modelId);

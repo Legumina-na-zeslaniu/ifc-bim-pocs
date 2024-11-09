@@ -4,17 +4,6 @@ import * as crypto from 'node:crypto';
 import * as WebIFC from 'web-ifc';
 
 // 126e3a92-870a-4209-b222-3c1777451a23
-// #100015=IFCCOLOURRGB($,0.5,0.5,0.5);
-// #100016=IFCSURFACESTYLERENDERING(#100015,0.,0.,$,$,$,$,$,.NOTDEFINED.);
-// #100017=IFCSURFACESTYLE('my surfacestyle',.BOTH.,(#100016));
-// #100018=IFCSTYLEDITEM(#100011,(#100017),$);
-// #100019=IFCSITE('site id',$,'my site','',$,$,$,$,$,$,$,$,$,$);
-// #100020=IFCRELAGGREGATES('aggregation id',$,$,$,#10009,(#100019));
-// #100021=IFCBUILDING('building id',$,'building','',$,$,$,$,$,$,$,$);
-// #100022=IFCRELAGGREGATES('aggregation id.2',$,$,$,#100019,(#100021));
-// #100023=IFCBUILDINGSTOREY('story id.2',$,'level 0','story',$,$,$,$,$,0.);
-// #100024=IFCRELAGGREGATES('aggregation id.3',$,$,$,#100021,(#100023));
-// #100025=IFCRELCONTAINEDINSPATIALSTRUCTURE('spatial id',$,$,$,(#100014),#100023);
 
 const bootstrap = async () => {
     let expressId = 0;
@@ -51,7 +40,7 @@ const bootstrap = async () => {
 
     const unit = new WebIFC.IFC4.IfcSIUnit(
         WebIFC.IFC4.IfcUnitEnum.VOLUMEUNIT,
-        WebIFC.IFC4.IfcSIPrefix.MILLI,
+        null,
         WebIFC.IFC4.IfcSIUnitName.CUBIC_METRE,
     );
 
@@ -96,9 +85,41 @@ const bootstrap = async () => {
 
     api.WriteLine(modelId, geometry);
 
+    const history = new WebIFC.IFC4.IfcOwnerHistory(
+        new WebIFC.IFC4.IfcPersonAndOrganization(
+            new WebIFC.IFC4.IfcPerson(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+            ),
+            new WebIFC.IFC4.IfcOrganization(
+                null,
+                new WebIFC.IFC4.IfcLabel('organization'),
+                null,
+                null,
+                null,
+            ),
+            null
+        ),
+        new WebIFC.Handle(application.expressID),
+        null,
+        WebIFC.IFC4.IfcChangeActionEnum.ADDED,
+        null,
+        null,
+        null,
+        new WebIFC.IFC4.IfcTimeStamp('2024-11-09T21:34:00Z'),
+    );
+
+    api.WriteLine(modelId, history);
+
     const project = new WebIFC.IFC4.IfcProject(
         new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()),
-        null,
+        new WebIFC.Handle(history.expressID),
         new WebIFC.IFC4.IfcLabel('project'),
         new WebIFC.IFC4.IfcText('project description'),
         null,
@@ -110,10 +131,28 @@ const bootstrap = async () => {
 
     api.WriteLine(modelId, project);
 
+    // #11=IFCDIRECTION((1.,0.));
+    // #2412=IFCCARTESIANPOINT((-1.7763568394002505E-14,0.));
+    // #2413=IFCAXIS2PLACEMENT2D(#2412,#11);
+    // #2414=IFCRECTANGLEPROFILEDEF(.AREA.,'1740X2032X2',#2413,50.799999999995052,735.00000000000045);
+
+    const position = new WebIFC.IFC4.IfcAxis2Placement2D(
+        new WebIFC.IFC4.IfcCartesianPoint([
+            new WebIFC.IFC4.IfcLengthMeasure(0),
+            new WebIFC.IFC4.IfcLengthMeasure(0),
+        ]),
+        new WebIFC.IFC4.IfcDirection([
+            new WebIFC.IFC4.IfcReal(1),
+            new WebIFC.IFC4.IfcReal(0),
+        ])
+    );
+
+    api.WriteLine(modelId, position);
+
     const profile = new WebIFC.IFC4.IfcRectangleProfileDef(
         WebIFC.IFC4.IfcProfileTypeEnum.AREA,
         new WebIFC.IFC4.IfcLabel('profile'),
-        null,
+        new WebIFC.Handle(position.expressID),
         new WebIFC.IFC4.IfcPositiveLengthMeasure(300),
         new WebIFC.IFC4.IfcPositiveLengthMeasure(400),
     );
@@ -140,7 +179,7 @@ const bootstrap = async () => {
 
     const column = new WebIFC.IFC4.IfcColumn(
         new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()),
-        null,
+        new WebIFC.Handle(history.expressID),
         new WebIFC.IFC4.IfcLabel('column'),
         new WebIFC.IFC4.IfcText('column description'),
         null,
@@ -173,6 +212,10 @@ const bootstrap = async () => {
         WebIFC.IFC4.IfcReflectanceMethodEnum.NOTDEFINED
     );
 
+    // IfcLabel
+    // IfcSurfaceSide
+    // IfcSurfaceStyleElementSelect
+
     const style = new WebIFC.IFC4.IfcSurfaceStyle(
         new WebIFC.IFC4.IfcLabel('my surfacestyle'),
         WebIFC.IFC4.IfcSurfaceSide.BOTH,
@@ -180,6 +223,12 @@ const bootstrap = async () => {
     )
 
     api.WriteLine(modelId, style);
+
+    // IfcRepresentationItem
+    // IfcStyleAssignmentSelect[]
+    // IfcLabel
+
+    // ENTITY IfcRepresentationItem ABSTRACT SUPERTYPE OF	(ONEOF(IfcTopologicalRepresentationItem, IfcGeometricRepresentationItem, IfcMappedItem, IfcStyledItem));
 
     const item = new WebIFC.IFC4.IfcStyledItem(
         solid,
@@ -191,14 +240,14 @@ const bootstrap = async () => {
 
     const site = new WebIFC.IFC4.IfcSite(
         new WebIFC.IFC4.IfcGloballyUniqueId('site id'),
-        null,
+        new WebIFC.Handle(history.expressID),
         new WebIFC.IFC4.IfcLabel('my site'),
         new WebIFC.IFC4.IfcText('my site'),
         null,
         null,
         null,
         null,
-        null,
+        WebIFC.IFC4.IfcElementCompositionEnum.COMPLEX,
         null,
         null,
         null,
@@ -210,7 +259,7 @@ const bootstrap = async () => {
 
     const aggregation = new WebIFC.IFC4.IfcRelAggregates(
         new WebIFC.IFC4.IfcGloballyUniqueId('aggregation id'),
-        null,
+        new WebIFC.Handle(history.expressID),
         null,
         null,
         project,
@@ -221,14 +270,14 @@ const bootstrap = async () => {
 
     const building = new WebIFC.IFC4.IfcBuilding(
         new WebIFC.IFC4.IfcGloballyUniqueId('building id'),
-        null,
+        new WebIFC.Handle(history.expressID),
         new WebIFC.IFC4.IfcLabel('building'),
         new WebIFC.IFC4.IfcText(''),
         null,
         null,
         null,
         null,
-        null,
+        WebIFC.IFC4.IfcElementCompositionEnum.COMPLEX,
         null,
         null,
         null,
@@ -245,14 +294,14 @@ const bootstrap = async () => {
 
     const storey = new WebIFC.IFC4.IfcBuildingStorey(
         new WebIFC.IFC4.IfcGloballyUniqueId('story id.2'),
-        null,
+        new WebIFC.Handle(history.expressID),
         new WebIFC.IFC4.IfcLabel('level 0'),
         new WebIFC.IFC4.IfcText('story'),
         null,
         null,
         null,
         null,
-        null,
+        WebIFC.IFC4.IfcElementCompositionEnum.COMPLEX,
         new WebIFC.IFC4.IfcPositiveLengthMeasure(0)
     );
 
@@ -269,7 +318,7 @@ const bootstrap = async () => {
 
     const spatial = new WebIFC.IFC4.IfcRelContainedInSpatialStructure(
         new WebIFC.IFC4.IfcGloballyUniqueId('spatial id'),
-        null,
+        new WebIFC.Handle(history.expressID),
         null,
         null,
         elements,
