@@ -69,7 +69,7 @@ const bootstrap = () => __awaiter(void 0, void 0, void 0, function* () {
     api.WriteLine(modelId, column);
     const color = new WebIFC.IFC4.IfcColourRgb(null, new WebIFC.IFC4.IfcNormalisedRatioMeasure(0.5), new WebIFC.IFC4.IfcNormalisedRatioMeasure(0.5), new WebIFC.IFC4.IfcNormalisedRatioMeasure(0.5));
     api.WriteLine(modelId, color);
-    const rendering = new WebIFC.IFC4.IfcSurfaceStyleRendering(color, new WebIFC.IFC4.IfcNormalisedRatioMeasure(0), new WebIFC.IFC4.IfcNormalisedRatioMeasure(0), null, null, null, null, null, WebIFC.IFC4.IfcReflectanceMethodEnum.NOTDEFINED);
+    const rendering = new WebIFC.IFC4.IfcSurfaceStyleRendering(color, new WebIFC.IFC4.IfcNormalisedRatioMeasure(0), null, null, null, null, null, null, WebIFC.IFC4.IfcReflectanceMethodEnum.NOTDEFINED);
     // IfcLabel
     // IfcSurfaceSide
     // IfcSurfaceStyleElementSelect
@@ -79,7 +79,9 @@ const bootstrap = () => __awaiter(void 0, void 0, void 0, function* () {
     // IfcStyleAssignmentSelect[]
     // IfcLabel
     // ENTITY IfcRepresentationItem ABSTRACT SUPERTYPE OF	(ONEOF(IfcTopologicalRepresentationItem, IfcGeometricRepresentationItem, IfcMappedItem, IfcStyledItem));
-    const item = new WebIFC.IFC4.IfcStyledItem(solid, [style], null);
+    const item = new WebIFC.IFC4.IfcStyledItem(solid, // IfcExtrudedAreaSolid
+    [new WebIFC.IFC4.IfcPresentationStyleAssignment([style])], // IfcSurfaceStyle[]
+    null);
     api.WriteLine(modelId, item);
     const site = new WebIFC.IFC4.IfcSite(new WebIFC.IFC4.IfcGloballyUniqueId('site id'), new WebIFC.Handle(history.expressID), new WebIFC.IFC4.IfcLabel('my site'), new WebIFC.IFC4.IfcText('my site'), null, null, null, null, WebIFC.IFC4.IfcElementCompositionEnum.COMPLEX, null, null, null, null, null);
     api.WriteLine(modelId, site);
@@ -102,7 +104,10 @@ const bootstrap = () => __awaiter(void 0, void 0, void 0, function* () {
     const elements = [column];
     const spatial = new WebIFC.IFC4.IfcRelContainedInSpatialStructure(new WebIFC.IFC4.IfcGloballyUniqueId('spatial id'), new WebIFC.Handle(history.expressID), null, null, elements, storey);
     api.WriteLine(modelId, spatial);
-    fs.writeFileSync(path.join(process.cwd(), 'etc', `model-${Date.now()}.ifc`), api.SaveModel(modelId));
+    const bytes = api.SaveModel(modelId);
+    const buffer = Buffer.from(bytes);
+    const text = buffer.toString().replace(/IFCSIUNIT\(#0,/g, 'IFCSIUNIT(*,');
+    fs.writeFileSync(path.join(process.cwd(), 'etc', `model-${Date.now()}.ifc`), Buffer.from(text));
     api.CloseModel(modelId);
 });
 bootstrap().catch(console.error);

@@ -1,3 +1,1 @@
-{"level": "error", "message": "Attribute is derived in subtype", "type": "schema", "instance": "#3=IfcSIUnit(*,.VOLUMEUNIT.,$,.CUBIC_METRE.)", "attribute": "IfcSIUnit.Dimensions"}
-{"level": "error", "message": "With attribute:\n    <attribute DiffuseColour?: <select IfcColourOrFactor: (<entity IfcColourRgb> | <type IfcNormalisedRatioMeasure: <type IfcRatioMeasure: <real>>>)>>\nValue:\n    0.0\nNot valid\n", "type": "schema", "instance": "#23=IfcSurfaceStyleRendering(#22,0.,0.,$,$,$,$,$,.NOTDEFINED.)", "attribute": "DiffuseColour"}
-{"level": "error", "message": "With attribute:\n    <attribute Styles: <set [1:?] of <entity IfcPresentationStyleAssignment>>>\nValue:\n    #24=IfcSurfaceStyle('my surfacestyle',.BOTH.,(#23))\nNot valid\n", "type": "schema", "instance": "#25=IfcStyledItem(#18,(#24),$)", "attribute": "Styles"}
+No validation issues found.

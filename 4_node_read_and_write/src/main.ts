@@ -203,7 +203,7 @@ const bootstrap = async () => {
     const rendering = new WebIFC.IFC4.IfcSurfaceStyleRendering(
         color,
         new WebIFC.IFC4.IfcNormalisedRatioMeasure(0),
-        new WebIFC.IFC4.IfcNormalisedRatioMeasure(0),
+        null,
         null,
         null,
         null,
@@ -231,8 +231,8 @@ const bootstrap = async () => {
     // ENTITY IfcRepresentationItem ABSTRACT SUPERTYPE OF	(ONEOF(IfcTopologicalRepresentationItem, IfcGeometricRepresentationItem, IfcMappedItem, IfcStyledItem));
 
     const item = new WebIFC.IFC4.IfcStyledItem(
-        solid,
-        [style],
+        solid, // IfcExtrudedAreaSolid
+        [new WebIFC.IFC4.IfcPresentationStyleAssignment([style])], // IfcSurfaceStyle[]
         null
     )
 
@@ -327,7 +327,11 @@ const bootstrap = async () => {
 
     api.WriteLine(modelId, spatial);
 
-    fs.writeFileSync(path.join(process.cwd(), 'etc', `model-${Date.now()}.ifc`), api.SaveModel(modelId));
+    const bytes = api.SaveModel(modelId);
+    const buffer = Buffer.from(bytes);
+    const text = buffer.toString().replace(/IFCSIUNIT\(#0,/g, 'IFCSIUNIT(*,');
+
+    fs.writeFileSync(path.join(process.cwd(), 'etc', `model-${Date.now()}.ifc`), Buffer.from(text));
     api.CloseModel(modelId);
 }
 
