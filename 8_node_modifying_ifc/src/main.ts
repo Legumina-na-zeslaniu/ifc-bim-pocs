@@ -9,37 +9,64 @@ const bootstrap = async () => {
 
     const modelId = api.OpenModel(fs.readFileSync(path.join(process.cwd(), 'etc', 'model.ifc')), { COORDINATE_TO_ORIGIN: true });
 
-    // const organization = new WebIFC.IFC4.IfcOrganization(
-    //     new WebIFC.IFC4.IfcIdentifier('organization id'),
-    //     new WebIFC.IFC4.IfcLabel('organization name'),
-    //     null,
-    //     null,
-    //     null,
-    // );
+    const circuit = [
+        { field: 'Type', value: 'Electrical Pane' },
+        { field: 'Name', value: 'Circuit Breaker Box' },
+        { field: 'Color', value: 'White and Blue' },
+        { field: 'Condition', value: 'Good' },
+        { field: 'Manufacturer', value: 'A|B' },
+        { field: 'NumberOfCircuits', value: '13' },
+        { field: 'RatedVoltage', value: '230v' },
+        { field: 'EstimatedSize', value: '20x30x8 [cm]' },
+    ];
 
-    // api.WriteLine(modelId, organization);
+    const cable = [
+        { field: 'Type', value: 'Cables' },
+        { field: 'Name', value: 'Hight Voltage Cable' },
+        { field: 'Color', value: 'Yellow' },
+        { field: 'Condition', value: 'Degraded' },
+        { field: 'Manufacturer', value: 'ZigTic' },
+        { field: 'EstimatedLength', value: '76 [m]' },
+    ]
 
-    // const application = new WebIFC.IFC4.IfcApplication(
-    //     organization,
-    //     new WebIFC.IFC4.IfcLabel('application version'),
-    //     new WebIFC.IFC4.IfcLabel('application name'),
-    //     new WebIFC.IFC4.IfcLabel('app'),
-    // );
+    const elements = [
+        spawn(api, modelId, [0, 0, 4], [0, 0, 0], [1000, 1000, 5000], [0, 0.5, 1.0], 'CircuitBreakerBox:#1', circuit),
+        spawn(api, modelId, [-10, -3.15, 4], [0, 0, 0], [1000, 1000, 5000], [0, 0.5, 1.0], 'CircuitBreakerBox:#2', circuit),
+        spawn(api, modelId, [-20, -6.3, 4], [0, 0, 0], [1000, 1000, 5000], [0, 0.5, 1.0], 'CircuitBreakerBox:#3', circuit),
+        spawn(api, modelId, [10, 3.15, 4], [0, 0, 0], [1000, 1000, 5000], [0, 0.5, 1.0], 'CircuitBreakerBox:#4', circuit),
+        spawn(api, modelId, [20, 6.3, 4], [0, 0, 0], [1000, 1000, 5000], [0, 0.5, 1.0], 'CircuitBreakerBox:#5', circuit),
+        spawn(api, modelId, [0, 0, 8], [0.0315, -0.1, 0], [125000, 300, 300], [1.0, 0.5, 0.0], 'HighVoltageCables:#1', cable),
+    ];
 
-    // api.WriteLine(modelId, application);
-
-    const unit = new WebIFC.IFC4.IfcSIUnit(
-        WebIFC.IFC4.IfcUnitEnum.VOLUMEUNIT,
+    const spatial = new WebIFC.IFC4.IfcRelContainedInSpatialStructure(
+        new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()),
+        new WebIFC.Handle(20),
         null,
-        WebIFC.IFC4.IfcSIUnitName.CUBIC_METRE,
+        null,
+        elements,
+        new WebIFC.Handle(102)
     );
 
-    const assignment = new WebIFC.IFC4.IfcUnitAssignment(
-        [unit]
-    );
+    api.WriteLine(modelId, spatial);
 
-    api.WriteLine(modelId, assignment);
+    const bytes = api.SaveModel(modelId);
+    const buffer = Buffer.from(bytes);
+    const text = buffer.toString().replace(/IFCSIUNIT\(#0,/g, 'IFCSIUNIT(*,');
 
+    fs.writeFileSync(path.join(process.cwd(), 'etc', `model-${Date.now()}.ifc`), Buffer.from(text));
+    api.CloseModel(modelId);
+}
+
+const spawn = (
+    api: WebIFC.IfcAPI,
+    modelId: number,
+    coords: number[],
+    rotate: number[],
+    size: number[],
+    rgb: number[],
+    name: string,
+    props: { field: string, value: string }[]
+) => {
     const origin = [
         new WebIFC.IFC4.IfcLengthMeasure(0),
         new WebIFC.IFC4.IfcLengthMeasure(0),
@@ -72,50 +99,24 @@ const bootstrap = async () => {
 
     api.WriteLine(modelId, geometry);
 
-    const history = new WebIFC.IFC4.IfcOwnerHistory(
-        new WebIFC.IFC4.IfcPersonAndOrganization(
-            new WebIFC.IFC4.IfcPerson(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-            ),
-            new WebIFC.Handle(1),
-            null
-        ),
-        new WebIFC.Handle(2),
-        null,
-        WebIFC.IFC4.IfcChangeActionEnum.ADDED,
-        null,
-        null,
-        null,
-        new WebIFC.IFC4.IfcTimeStamp('2024-11-09T21:34:00Z'),
-    );
-
-    api.WriteLine(modelId, history);
-
     const project = new WebIFC.IFC4.IfcProject(
         new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()),
-        new WebIFC.Handle(history.expressID),
+        new WebIFC.Handle(20),
         new WebIFC.IFC4.IfcLabel('project'),
         new WebIFC.IFC4.IfcText('project description'),
         null,
         null,
         null,
         [geometry],
-        assignment,
+        new WebIFC.Handle(84)
     );
 
     api.WriteLine(modelId, project);
 
     const position = new WebIFC.IFC4.IfcAxis2Placement2D(
         new WebIFC.IFC4.IfcCartesianPoint([
-            new WebIFC.IFC4.IfcLengthMeasure(0),
-            new WebIFC.IFC4.IfcLengthMeasure(0),
+            new WebIFC.IFC4.IfcLengthMeasure(coords[0] * 1000),
+            new WebIFC.IFC4.IfcLengthMeasure(coords[1] * 1000),
         ]),
         new WebIFC.IFC4.IfcDirection([
             new WebIFC.IFC4.IfcReal(0),
@@ -129,15 +130,15 @@ const bootstrap = async () => {
         WebIFC.IFC4.IfcProfileTypeEnum.AREA,
         new WebIFC.IFC4.IfcLabel('profile'),
         new WebIFC.Handle(position.expressID),
-        new WebIFC.IFC4.IfcPositiveLengthMeasure(1000),
-        new WebIFC.IFC4.IfcPositiveLengthMeasure(1000),
+        new WebIFC.IFC4.IfcPositiveLengthMeasure(size[0]),
+        new WebIFC.IFC4.IfcPositiveLengthMeasure(size[1]),
     );
 
     const solid = new WebIFC.IFC4.IfcExtrudedAreaSolid(
         profile,
         axis,
         direction,
-        new WebIFC.IFC4.IfcPositiveLengthMeasure(1000),
+        new WebIFC.IFC4.IfcPositiveLengthMeasure(size[2]),
     );
 
     const shape = new WebIFC.IFC4.IfcShapeRepresentation(
@@ -155,45 +156,51 @@ const bootstrap = async () => {
 
     const column = new WebIFC.IFC4.IfcColumn(
         new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()),
-        new WebIFC.Handle(history.expressID),
-        new WebIFC.IFC4.IfcLabel('column'),
-        new WebIFC.IFC4.IfcText('column description'),
+        new WebIFC.Handle(20),
+        new WebIFC.IFC4.IfcLabel(name),
         null,
         null,
+        new WebIFC.IFC4.IfcLocalPlacement(
+            null,
+            new WebIFC.IFC4.IfcAxis2Placement3D(
+                new WebIFC.IFC4.IfcCartesianPoint([
+                    new WebIFC.IFC4.IfcLengthMeasure(coords[0] * 1000),
+                    new WebIFC.IFC4.IfcLengthMeasure(coords[1] * 1000),
+                    new WebIFC.IFC4.IfcLengthMeasure(coords[2] * 1000),
+                ]),
+                new WebIFC.IFC4.IfcDirection([
+                    new WebIFC.IFC4.IfcReal(rotate[0]),
+                    new WebIFC.IFC4.IfcReal(rotate[1]),
+                    new WebIFC.IFC4.IfcReal(rotate[2]),
+                ]),
+                null
+            ),
+        ),
         product,
-        new WebIFC.IFC4.IfcIdentifier('column identifier'),
+        new WebIFC.IFC4.IfcIdentifier(name),
         WebIFC.IFC4.IfcColumnTypeEnum.NOTDEFINED,
     );
 
     api.WriteLine(modelId, column);
 
-    const manufacture = new WebIFC.IFC4.IfcPropertySingleValue(
-        new WebIFC.IFC4.IfcIdentifier("Manufacturer"),
-        null,
-        new WebIFC.IFC4.IfcLabel("MSI"),
-        null,
-    );
-
-    const model = new WebIFC.IFC4.IfcPropertySingleValue(
-        new WebIFC.IFC4.IfcIdentifier("Model"),
-        null,
-        new WebIFC.IFC4.IfcLabel("GV62 8RE-016US"),
-        null,
-    );
-
     const propertySet = new WebIFC.IFC4.IfcPropertySet(
-        new WebIFC.IFC4.IfcGloballyUniqueId('property set id'),
-        new WebIFC.Handle(history.expressID),
-        new WebIFC.IFC4.IfcLabel('Pset_SpaceCommon'),
+        new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()),
+        new WebIFC.Handle(20),
+        new WebIFC.IFC4.IfcLabel('Pset_AssetEase'),
         null,
-        [manufacture, model],
+        props.map(prop => new WebIFC.IFC4.IfcPropertySingleValue(
+            new WebIFC.IFC4.IfcIdentifier(prop.field),
+            null,
+            new WebIFC.IFC4.IfcLabel(prop.value),
+            null,
+        ))
     );
 
     api.WriteLine(modelId, propertySet);
 
     const defines = new WebIFC.IFC4.IfcRelDefinesByProperties(
-        new WebIFC.IFC4.IfcGloballyUniqueId('defines id'),
-        new WebIFC.Handle(history.expressID),
+        new WebIFC.IFC4.IfcGloballyUniqueId(crypto.randomUUID()),
+        new WebIFC.Handle(20),
         null,
         null,
         [column],
@@ -204,9 +211,9 @@ const bootstrap = async () => {
 
     const color = new WebIFC.IFC4.IfcColourRgb(
         null,
-        new WebIFC.IFC4.IfcNormalisedRatioMeasure(1.0),
-        new WebIFC.IFC4.IfcNormalisedRatioMeasure(0.0),
-        new WebIFC.IFC4.IfcNormalisedRatioMeasure(0.0),
+        new WebIFC.IFC4.IfcNormalisedRatioMeasure(rgb[0]),
+        new WebIFC.IFC4.IfcNormalisedRatioMeasure(rgb[1]),
+        new WebIFC.IFC4.IfcNormalisedRatioMeasure(rgb[2]),
     );
 
     api.WriteLine(modelId, color);
@@ -239,25 +246,7 @@ const bootstrap = async () => {
 
     api.WriteLine(modelId, item);
 
-    const elements = [column];
-
-    const spatial = new WebIFC.IFC4.IfcRelContainedInSpatialStructure(
-        new WebIFC.IFC4.IfcGloballyUniqueId('spatial id'),
-        new WebIFC.Handle(history.expressID),
-        null,
-        null,
-        elements,
-        new WebIFC.Handle(102)
-    );
-
-    api.WriteLine(modelId, spatial);
-
-    const bytes = api.SaveModel(modelId);
-    const buffer = Buffer.from(bytes);
-    const text = buffer.toString().replace(/IFCSIUNIT\(#0,/g, 'IFCSIUNIT(*,');
-
-    fs.writeFileSync(path.join(process.cwd(), 'etc', `model-${Date.now()}.ifc`), Buffer.from(text));
-    api.CloseModel(modelId);
+    return column;
 }
 
 bootstrap().catch(console.error);
